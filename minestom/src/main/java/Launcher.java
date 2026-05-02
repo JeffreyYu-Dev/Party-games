@@ -9,9 +9,7 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.InstanceManager;
-import net.minestom.server.network.packet.server.play.PlayerInfoRemovePacket;
 
 
 void main() {
@@ -26,32 +24,22 @@ void main() {
 
 
 //    when the server starts there needs to be a first lobby
-    Instances.getLobbyManager().createLobby("Lobby-1");
+    Instances.getLobbyManager().createLobby("Lobby-1", new Pos(0, 42, 0), 40);
 
 
     GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
     globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
         final Player player = event.getPlayer();
-        event.setSpawningInstance(Instances.getLobbyManager().getFirstLobby());
+//        TODO: FIX THIS we're not using the join method we made in the lobby manager
+//        this event always needs event.setSpawningInstance() but it conflicts with player.setInstance() in the lobby join method
+
+        event.setSpawningInstance(Instances.getLobbyManager().getLeastPopulatedLobby().getInstance());
         player.setRespawnPoint(new Pos(0, 42, 0));
+
+
         player.setGameMode(GameMode.CREATIVE);
     });
 
-    globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
-        Player joined = event.getPlayer();
-
-        MinecraftServer.getConnectionManager().getOnlinePlayers()
-                .forEach(other -> {
-                    if (other.equals(joined)) return;
-
-                    if (!other.getInstance().equals(joined.getInstance())) {
-                        // Remove other from joined's tab list
-                        joined.sendPacket(new PlayerInfoRemovePacket(other.getUuid()));
-                        // Remove joined from other's tab list
-                        other.sendPacket(new PlayerInfoRemovePacket(joined.getUuid()));
-                    }
-                });
-    });
 
     //    register all commands
     CommandRegistry cm = new CommandRegistry();
