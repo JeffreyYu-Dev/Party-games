@@ -1,30 +1,31 @@
-package Commands;
+package commands;
 
-import Instances.Instances;
+import instance.InstancesManager;
+import lobby.Lobby;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 
 public class JoinLobby extends Command {
-    public JoinLobby() {
+
+    public JoinLobby(InstancesManager instancesManager) {
         super("join", "j");
+        setDefaultExecutor((sender, context) -> sender.sendMessage("Usage: /join <lobby-name>"));
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage("Usage: join room");
-        });
-
-        var lobbyId = ArgumentType.String("lobby-name");
-
+        var lobbyName = ArgumentType.String("lobby-name");
 
         addSyntax((sender, context) -> {
-            final String id = context.get("lobby-name");
-            sender.sendMessage("JOINING " + id);
             if (!(sender instanceof Player player)) return;
 
+            final String name = context.get("lobby-name");
+            Lobby lobby = instancesManager.getLobbyManager().getLobby(name);
 
-            Instances.getLobbyManager().getLobby(id).join(player);
-        }, lobbyId);
+            if (lobby == null) {
+                sender.sendMessage("Lobby not found: " + name);
+                return;
+            }
 
-
+            lobby.onJoin(player);
+        }, lobbyName);
     }
 }

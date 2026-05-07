@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { generateCode } from "./utils";
+import { upgradeWebSocket, websocket } from "hono/bun";
 
 const app = new Hono();
 
@@ -7,29 +7,21 @@ app.get("/", (c) => {
 	return c.text("Hello Hono!");
 });
 
-type room = {
-	id: string;
+app.get(
+	"/ws",
+	upgradeWebSocket((c) => {
+		return {
+			onMessage(event, ws) {
+				ws.send("Hello from server!");
+			},
+			onClose: () => {
+				console.log("Connection closed");
+			},
+		};
+	}),
+);
+
+export default {
+	fetch: app.fetch,
+	websocket,
 };
-
-const rooms = new Map<string, room>();
-
-app.post("api/rooms/create", async (c) => {
-	// TODO: add verfication that it's a minecraft player and online
-
-	const code = generateCode();
-
-	return c.json({
-		code,
-	});
-});
-
-app.post("api/rooms/join", async (c) => {
-	const { code } = await c.req.json();
-
-	console.log(code);
-
-	return c.text("joined");
-});
-app.post("api/rooms/leave", async (c) => {});
-
-export default app;

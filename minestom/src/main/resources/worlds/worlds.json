@@ -1,0 +1,19 @@
+{
+  "lobby": {
+    "type": "LOBBY",
+    "maps": [
+      {
+        "name": "lobby",
+        "directory": "/lobby",
+        "spawn": {
+          "x": 0,
+          "y": 100,
+          "z": 0
+        }
+      }
+    ]
+  },
+  "party": {
+    "maps": []
+  }
+}

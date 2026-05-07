@@ -1,5 +1,5 @@
-package Config;
+package config;
 
 public class Env {
-    static String redisConnectionString = System.getenv("REDIS_CONNECTION_STRING");
+    public static final String REDIS_CONNECTION_STRING = System.getenv("REDIS_CONNECTION_STRING");
 }

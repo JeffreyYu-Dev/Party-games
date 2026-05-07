@@ -1,6 +1,6 @@
 package services;
 
-import services.Redis.Redis;
+import services.redis.Redis;
 
 public class Services {
     private static Redis redis;
@@ -8,7 +8,7 @@ public class Services {
     public static void init(Redis r) {
         redis = r;
     }
-    
+
     public static Redis redis() {
         return redis;
     }
