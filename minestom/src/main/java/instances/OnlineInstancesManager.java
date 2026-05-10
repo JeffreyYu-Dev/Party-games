@@ -1,8 +1,8 @@
 package instances;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import net.minestom.server.MinecraftServer;
+
+import java.util.*;
 
 public class OnlineInstancesManager {
     private static final HashMap<UUID, Lobby> lobbies = new HashMap<>();
@@ -21,9 +21,27 @@ public class OnlineInstancesManager {
         return lobby;
     }
 
-    public static Lobby getLobby(UUID lobby) {
-        return lobbies.get(lobby);
+    public static Lobby getLobby(UUID id) {
+        return lobbies.get(id);
     }
+
+
+    public static Lobby removeLobby(UUID id) {
+        if (lobbies.size() <= 1) {
+            return null;
+        }
+
+        Lobby lobby = lobbies.remove(id);
+        if (lobby == null) return null;
+
+        Lobby fallback = lobbies.values().iterator().next();
+        lobby.getInstance().getPlayers().forEach(player -> player.setInstance(fallback.getInstance(), fallback.getSpawn()));
+
+        MinecraftServer.getInstanceManager().unregisterInstance(lobby.getInstance());
+        
+        return lobby;
+    }
+
 
     public static List<Lobby> getLobbies() {
         return lobbies.values().stream().toList();

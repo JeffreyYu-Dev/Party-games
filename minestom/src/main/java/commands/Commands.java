@@ -3,6 +3,7 @@ package commands;
 import commands.instances.Create;
 import commands.instances.Join;
 import commands.instances.ListLobbies;
+import commands.instances.RemoveLobby;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 
@@ -13,5 +14,6 @@ public class Commands {
         cm.register(new Join());
         cm.register(new ListLobbies());
         cm.register(new Create());
+        cm.register(new RemoveLobby());
     }
 }

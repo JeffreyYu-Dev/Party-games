@@ -17,7 +17,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // mini http server
-    implementation("io.javalin:javalin:6.3.0")
+    implementation("io.javalin:javalin:7.2.0")
 
     // Minestom
     implementation("net.minestom:minestom:2026.04.13-1.21.11")
