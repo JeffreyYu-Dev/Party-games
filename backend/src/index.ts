@@ -12,6 +12,8 @@ app.get(
 	upgradeWebSocket((c) => {
 		return {
 			onMessage(event, ws) {
+				// msg from the frontend
+				console.log(event);
 				ws.send("Hello from server!");
 			},
 			onClose: () => {
