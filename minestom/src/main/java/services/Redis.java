@@ -35,6 +35,9 @@ public class Redis {
     private void handleMessage(String channel, String message) {
         System.out.println("[" + channel + "] " + message);
         // dispatch to your Minestom logic here
+
+//        handle messages HERE  
+
     }
 
     public void shutdown() {

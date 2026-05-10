@@ -15,12 +15,14 @@ void main() {
 
     OnlineInstance lobby = OnlineInstancesManager.createLobby("L1", 20, "super-flat-world");
 
+
     GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
     globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
         final Player player = event.getPlayer();
         event.setSpawningInstance(lobby.getInstance());
         player.setRespawnPoint(lobby.getSpawn());
     });
+
 
     minecraftServer.start("0.0.0.0", 25565);
 }
