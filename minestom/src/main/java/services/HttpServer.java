@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import DTO.maps.Maps;
+
 public class HttpServer {
 
     public HttpServer(int port) {
@@ -22,6 +24,10 @@ public class HttpServer {
 //            TODO: add a route to get what maps are available
 
             config.routes.get("/maps", ctx -> {
+//                Maps maps =
+            });
+
+            config.routes.get("/lobby/list", ctx -> {
 
                 List<Lobby> lobbies = OnlineInstancesManager.getLobbies();
                 List<Map<String, Object>> result = lobbies.stream().map(lobby -> Map.<String, Object>of(

@@ -10,6 +10,9 @@ app.get("/", (c) => {
 	return c.text("Hello Hono!");
 });
 
+// TODO: how does the realtime updates work?
+// when the page loads the frontend will tell the api to subscribe it's events
+
 app.get(
 	"/ws",
 	upgradeWebSocket((c) => {
