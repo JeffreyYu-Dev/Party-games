@@ -9,68 +9,110 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRoomsRouteImport } from './routes/admin/rooms'
 import { Route as AdminLobbiesRouteImport } from './routes/admin/lobbies'
+import { Route as AdminIssuesRouteImport } from './routes/admin/issues'
 import { Route as AdminGamesRouteImport } from './routes/admin/games'
 
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoomsRoute = AdminRoomsRouteImport.update({
-  id: '/admin/rooms',
-  path: '/admin/rooms',
-  getParentRoute: () => rootRouteImport,
+  id: '/rooms',
+  path: '/rooms',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminLobbiesRoute = AdminLobbiesRouteImport.update({
-  id: '/admin/lobbies',
-  path: '/admin/lobbies',
-  getParentRoute: () => rootRouteImport,
+  id: '/lobbies',
+  path: '/lobbies',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminIssuesRoute = AdminIssuesRouteImport.update({
+  id: '/issues',
+  path: '/issues',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminGamesRoute = AdminGamesRouteImport.update({
-  id: '/admin/games',
-  path: '/admin/games',
-  getParentRoute: () => rootRouteImport,
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => AdminRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/games': typeof AdminGamesRoute
+  '/admin/issues': typeof AdminIssuesRoute
   '/admin/lobbies': typeof AdminLobbiesRoute
   '/admin/rooms': typeof AdminRoomsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/games': typeof AdminGamesRoute
+  '/admin/issues': typeof AdminIssuesRoute
   '/admin/lobbies': typeof AdminLobbiesRoute
   '/admin/rooms': typeof AdminRoomsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/games': typeof AdminGamesRoute
+  '/admin/issues': typeof AdminIssuesRoute
   '/admin/lobbies': typeof AdminLobbiesRoute
   '/admin/rooms': typeof AdminRoomsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin/games' | '/admin/lobbies' | '/admin/rooms'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/admin/games'
+    | '/admin/issues'
+    | '/admin/lobbies'
+    | '/admin/rooms'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/games' | '/admin/lobbies' | '/admin/rooms'
-  id: '__root__' | '/' | '/admin/games' | '/admin/lobbies' | '/admin/rooms'
+  to:
+    | '/'
+    | '/admin'
+    | '/admin/games'
+    | '/admin/issues'
+    | '/admin/lobbies'
+    | '/admin/rooms'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/admin/games'
+    | '/admin/issues'
+    | '/admin/lobbies'
+    | '/admin/rooms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminGamesRoute: typeof AdminGamesRoute
-  AdminLobbiesRoute: typeof AdminLobbiesRoute
-  AdminRoomsRoute: typeof AdminRoomsRoute
+  AdminRoute: typeof AdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -80,33 +122,54 @@ declare module '@tanstack/react-router' {
     }
     '/admin/rooms': {
       id: '/admin/rooms'
-      path: '/admin/rooms'
+      path: '/rooms'
       fullPath: '/admin/rooms'
       preLoaderRoute: typeof AdminRoomsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/lobbies': {
       id: '/admin/lobbies'
-      path: '/admin/lobbies'
+      path: '/lobbies'
       fullPath: '/admin/lobbies'
       preLoaderRoute: typeof AdminLobbiesRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/issues': {
+      id: '/admin/issues'
+      path: '/issues'
+      fullPath: '/admin/issues'
+      preLoaderRoute: typeof AdminIssuesRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/games': {
       id: '/admin/games'
-      path: '/admin/games'
+      path: '/games'
       fullPath: '/admin/games'
       preLoaderRoute: typeof AdminGamesRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
   }
 }
 
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+interface AdminRouteChildren {
+  AdminGamesRoute: typeof AdminGamesRoute
+  AdminIssuesRoute: typeof AdminIssuesRoute
+  AdminLobbiesRoute: typeof AdminLobbiesRoute
+  AdminRoomsRoute: typeof AdminRoomsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
   AdminGamesRoute: AdminGamesRoute,
+  AdminIssuesRoute: AdminIssuesRoute,
   AdminLobbiesRoute: AdminLobbiesRoute,
   AdminRoomsRoute: AdminRoomsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
