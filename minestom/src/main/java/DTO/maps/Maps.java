@@ -14,5 +14,9 @@ public class Maps {
         return this.maps.stream().filter(map -> map.getName().equals(name)).findFirst().orElse(null);
     }
 
-  
+    public List<Map> getMaps() {
+        return this.maps;
+    }
+
+
 }

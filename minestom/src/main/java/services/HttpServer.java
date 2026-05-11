@@ -13,13 +13,16 @@ import java.util.UUID;
 
 public class HttpServer {
 
-    public HttpServer() {
+    public HttpServer(int port) {
         Gson gson = new GsonBuilder().serializeNulls().create();
 
         Javalin app = Javalin.create(config -> {
             config.jsonMapper(new JavalinGson(gson, true));
 
-            config.routes.get("/lobbies", ctx -> {
+//            TODO: add a route to get what maps are available
+
+            config.routes.get("/maps", ctx -> {
+
                 List<Lobby> lobbies = OnlineInstancesManager.getLobbies();
                 List<Map<String, Object>> result = lobbies.stream().map(lobby -> Map.<String, Object>of(
                         "id", lobby.getId().toString(),
@@ -30,7 +33,7 @@ public class HttpServer {
                 ctx.json(result);
             });
 
-            config.routes.post("/lobbies", ctx -> {
+            config.routes.post("/lobby", ctx -> {
                 record CreateLobbyRequest(String name, String map, int playerCap) {
                 }
 
@@ -48,7 +51,7 @@ public class HttpServer {
                 ));
             });
 
-            config.routes.delete("/lobbies/{id}", ctx -> {
+            config.routes.delete("/lobby/{id}", ctx -> {
                 UUID id;
                 try {
                     id = UUID.fromString(ctx.pathParam("id"));
@@ -66,9 +69,33 @@ public class HttpServer {
                 ctx.json(Map.of("removed", lobby.getId().toString(), "name", lobby.getName()));
             });
 
+
+            config.routes.patch("/lobby/{id}", ctx -> {
+                record EditLobbyRequest(String name) {
+                }
+                UUID id;
+
+                try {
+                    id = UUID.fromString(ctx.pathParam("id"));
+                } catch (IllegalArgumentException e) {
+                    ctx.status(400).json(Map.of("error", "invalid UUID"));
+                    return;
+                }
+
+                EditLobbyRequest body = ctx.bodyAsClass(EditLobbyRequest.class);
+                if (body.name() == null) {
+                    ctx.status(400).json(Map.of("error", "name is required"));
+                    return;
+                }
+
+                Lobby lobby = OnlineInstancesManager.getLobby(id);
+                lobby.setName(body.name());
+
+                ctx.status(204);
+            });
         });
 
-        app.start();
+        app.start(port);
 
 
     }

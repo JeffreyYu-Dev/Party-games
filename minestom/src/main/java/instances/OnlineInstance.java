@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public abstract class OnlineInstance {
     private final UUID id;
-    private final String name;
+    private String name;
     private final int playerCap;
     private final InstanceContainer instance;
     private Pos spawn;
@@ -80,8 +80,11 @@ public abstract class OnlineInstance {
 
     public void join(Player plr) {
         if (plr.getInstance() == this.instance) return;
-        
+
         plr.setInstance(this.instance, this.spawn);
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 }
