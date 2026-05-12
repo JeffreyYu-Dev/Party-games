@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import DTO.maps.Maps;
+import net.minestom.server.entity.Entity;
 
 public class HttpServer {
 
@@ -28,14 +29,15 @@ public class HttpServer {
             });
 
             config.routes.get("/lobby/list", ctx -> {
-
                 List<Lobby> lobbies = OnlineInstancesManager.getLobbies();
                 List<Map<String, Object>> result = lobbies.stream().map(lobby -> Map.<String, Object>of(
                         "id", lobby.getId().toString(),
                         "name", lobby.getName(),
-                        "players", lobby.getPlayerCount(),
-                        "playerCap", lobby.getPlayerCap()
+                        "playerCap", lobby.getPlayerCap(),
+                        "players", lobby.getPlayers().stream().map(Entity::getUuid).toArray(),
+                        "map", lobby.getMap()
                 )).toList();
+
                 ctx.json(result);
             });
 

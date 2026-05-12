@@ -11,6 +11,7 @@ import net.minestom.server.instance.InstanceManager;
 
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ public abstract class OnlineInstance {
     private String name;
     private final int playerCap;
     private final InstanceContainer instance;
+    private String map;
     private Pos spawn;
 
 
@@ -41,7 +43,7 @@ public abstract class OnlineInstance {
 
         this.spawn = map.getDefaultSpawn().toPos();
         this.instance.setChunkLoader(map.getMap());
-
+        this.map = map.getName();
     }
 
     private Maps parseMaps() {
@@ -87,4 +89,13 @@ public abstract class OnlineInstance {
     public void setName(String name) {
         this.name = name;
     }
+
+    public List<Player> getPlayers() {
+        return this.instance.getPlayers().stream().toList();
+    }
+
+    public String getMap() {
+        return this.map;
+    }
+
 }
