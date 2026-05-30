@@ -1,7 +1,7 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-
+import { TooltipProvider } from "#/components/ui/tooltip";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -19,6 +19,16 @@ export const Route = createRootRoute({
 			},
 		],
 		links: [
+			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
+			{
+				rel: "preconnect",
+				href: "https://fonts.gstatic.com",
+				crossOrigin: "anonymous",
+			},
+			{
+				rel: "stylesheet",
+				href: "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap",
+			},
 			{
 				rel: "stylesheet",
 				href: appCss,
@@ -30,12 +40,12 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en">
+		<html lang="en" className="dark">
 			<head>
 				<HeadContent />
 			</head>
 			<body>
-				{children}
+				<TooltipProvider>{children}</TooltipProvider>
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",

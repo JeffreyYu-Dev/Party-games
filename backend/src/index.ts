@@ -1,79 +1,54 @@
 import { Hono } from "hono";
-import { upgradeWebSocket, websocket } from "hono/bun";
-import { actions, WebsocketRouter } from "./websocketRouter";
-import { createLobby, deleteLobby, editLobby } from "./functions";
-import type { CreateLobbyBody, DeleteLobbyBody, EditLobbyBody } from "./types";
+import { websocket } from "hono/bun";
+
+import { subcriber, channels } from "./services/redis/redis";
+import { broadcast } from "./routers/websocket/websocket";
+import { RedisRouter } from "./services/redis/redisRouter";
+
+import websocketRouter from "#/routers/websocket/websocket";
+
+import httpRouter from "#/routers/http";
 
 const app = new Hono();
 
-app.get("/", (c) => {
-	return c.text("Hello Hono!");
-});
+// ── Redis → WS bridge ────────────────────────────────────────────────────────
 
-// TODO: how does the realtime updates work?
-// when the page loads the frontend will tell the api to subscribe it's events
+subcriber.subscribe(channels.lobby.created, channels.lobby.events);
+subcriber.psubscribe(channels.lobby.statsPattern);
 
-app.get(
-	"/ws",
-	upgradeWebSocket((c) => {
-		return {
-			onMessage(event, ws) {
-				const websocketRouter = new WebsocketRouter();
+const redisRouter = new RedisRouter();
 
-				websocketRouter.on(actions.lobby.create, async (msg) => {
-					const { name, map, playerCap } = msg.body as CreateLobbyBody;
-
-					const res = await createLobby(name, map, playerCap);
-
-					// TODO: create standard response and fix up how to respond
-					if (!res.ok) {
-						ws.send("Could not create lobby");
-						return;
-					}
-
-					ws.send(JSON.stringify(await res.json()));
-				});
-
-				websocketRouter.on(actions.lobby.delete, async (msg) => {
-					const { id } = msg.body as DeleteLobbyBody;
-
-					const res = await deleteLobby(id);
-
-					if (!res.ok) {
-						ws.send("could not delete lobby");
-						return;
-					}
-
-					ws.send(JSON.stringify(await res.json()));
-				});
-
-				websocketRouter.on(actions.lobby.edit, async (msg) => {
-					const { id, name } = msg.body as EditLobbyBody;
-
-					const res = await editLobby(id, name);
-
-					if (!res.ok) {
-						ws.send("could not edit lobby");
-						return;
-					}
-
-					ws.send(JSON.stringify(res.json()));
-				});
-
-				try {
-					websocketRouter.dispatch(event.data);
-				} catch (err) {
-					if (err instanceof Error) {
-						ws.send(err.message);
-					}
-				}
-			},
-			onClose: () => {
-				console.log("Connection closed");
-			},
-		};
-	}),
+subcriber.on("message", (channel, message) =>
+	redisRouter.dispatchMessage(channel, message),
 );
+
+subcriber.on("pmessage", (pattern, channel, message) =>
+	redisRouter.dispatchPmessage(pattern, channel, message),
+);
+
+redisRouter
+	.on(channels.lobby.created, (payload) => {
+		broadcast("lobbies", { event: "lobby:created", data: payload });
+	})
+
+	.on(channels.lobby.events, (payload) => {
+		broadcast("lobbies", { event: `lobby:${payload.type}`, data: payload });
+		if (payload.lobbyId) {
+			broadcast(`lobby:${payload.lobbyId}`, {
+				event: `lobby:${payload.type}`,
+				data: payload,
+			});
+		}
+	})
+	.onPattern(channels.lobby.statsPattern, (channel, payload) => {
+		const lobbyId = channel.split(":")[2];
+		broadcast(`lobby:${lobbyId}`, { event: "lobby:stats", data: payload });
+	});
+
+// ── Routes ───────────────────────────────────────────────────────────────────
+
+app.route("/", httpRouter);
+app.route("/ws", websocketRouter);
 
 export default {
 	fetch: app.fetch,

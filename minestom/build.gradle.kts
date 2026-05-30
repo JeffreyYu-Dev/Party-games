@@ -23,7 +23,7 @@ dependencies {
     implementation("net.minestom:minestom:2026.04.13-1.21.11")
 
     // Redis
-    compileOnly("io.lettuce:lettuce-core:6.7.1.RELEASE")
+    implementation("io.lettuce:lettuce-core:6.7.1.RELEASE")
 
     // Logger
     implementation("org.slf4j:slf4j-simple:2.0.17")
@@ -32,4 +32,18 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.withType<JavaExec> {
+    val envFile = file("${rootDir}/.env")
+    if (envFile.exists()) {
+        envFile.readLines()
+            .filter { it.isNotBlank() && !it.startsWith("#") }
+            .forEach { line ->
+                val (key, value) = line.split("=", limit = 2)
+                environment(key.trim(), value.trim())
+            }
+    }
+}
+
+
 

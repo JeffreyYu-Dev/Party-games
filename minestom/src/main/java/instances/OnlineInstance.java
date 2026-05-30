@@ -6,8 +6,12 @@ import com.google.gson.Gson;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
+import utils.ServerUptime;
 
 import java.io.FileReader;
 import java.io.Reader;
@@ -15,22 +19,36 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+
 public abstract class OnlineInstance {
-    private final UUID id;
+    private final UUID id = UUID.randomUUID();
     private String name;
     private final int playerCap;
     private final InstanceContainer instance;
+    private final EventNode<PlayerEvent> eventNode;
     private String map;
     private Pos spawn;
+    private final ServerUptime uptime = new ServerUptime();
 
 
     public OnlineInstance(String name, int playerCap) {
-        this.id = UUID.randomUUID();
         this.name = name;
         this.playerCap = playerCap;
 
         InstanceManager manager = MinecraftServer.getInstanceManager();
         this.instance = manager.createInstanceContainer();
+
+        this.eventNode = EventNode.type(id.toString(), EventFilter.PLAYER,
+                (event, player) -> player.getInstance() == this.instance);
+        MinecraftServer.getGlobalEventHandler().addChild(this.eventNode);
+
+        registerEvents();
+    }
+
+    protected abstract void registerEvents();
+
+    public EventNode<PlayerEvent> getEventNode() {
+        return eventNode;
     }
 
     public void setMap(String mapName) throws NullPointerException {
@@ -96,6 +114,10 @@ public abstract class OnlineInstance {
 
     public String getMap() {
         return this.map;
+    }
+
+    public long getUptimeStart() {
+        return this.uptime.getStartEpochSecond();
     }
 
 }

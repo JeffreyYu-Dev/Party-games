@@ -2,13 +2,17 @@ import { z } from "zod";
 
 const createEnv = () => {
 	const envSchema = z.object({
-		redisConnectionString: z.string(),
+		redisURL: z.string(),
+		databaseURL: z.string(),
 		minestomURL: z.string(),
+		internalSecret: z.string(),
 	});
 
 	const { success, data } = envSchema.safeParse({
-		redisConnectionString: Bun.env.REDIS_CONNECTION_STRING,
+		redisURL: Bun.env.REDIS_CONNECTION_STRING,
+		databaseURL: Bun.env.DATABASE_URL,
 		minestomURL: Bun.env.MINESTOM_URL,
+		internalSecret: Bun.env.INTERNAL_SECRET,
 	});
 
 	if (!success) {

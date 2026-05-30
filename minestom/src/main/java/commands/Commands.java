@@ -1,6 +1,7 @@
 package commands;
 
 import commands.instances.Create;
+import commands.instances.Friend;
 import commands.instances.Join;
 import commands.instances.ListLobbies;
 import commands.instances.RemoveLobby;
@@ -15,5 +16,6 @@ public class Commands {
         cm.register(new ListLobbies());
         cm.register(new Create());
         cm.register(new RemoveLobby());
+        cm.register(new Friend());
     }
 }

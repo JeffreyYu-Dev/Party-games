@@ -9,38 +9,94 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminInstancesLobbiesIndexRouteImport } from './routes/admin/_instances/lobbies/index'
+import { Route as AdminInstancesLobbiesLobbyIdRouteImport } from './routes/admin/_instances/lobbies/$lobbyId'
 
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminInstancesLobbiesIndexRoute =
+  AdminInstancesLobbiesIndexRouteImport.update({
+    id: '/_instances/lobbies/',
+    path: '/lobbies/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdminInstancesLobbiesLobbyIdRoute =
+  AdminInstancesLobbiesLobbyIdRouteImport.update({
+    id: '/_instances/lobbies/$lobbyId',
+    path: '/lobbies/$lobbyId',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
+  '/admin/lobbies/$lobbyId': typeof AdminInstancesLobbiesLobbyIdRoute
+  '/admin/lobbies/': typeof AdminInstancesLobbiesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/lobbies/$lobbyId': typeof AdminInstancesLobbiesLobbyIdRoute
+  '/admin/lobbies': typeof AdminInstancesLobbiesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
+  '/admin/_instances/lobbies/$lobbyId': typeof AdminInstancesLobbiesLobbyIdRoute
+  '/admin/_instances/lobbies/': typeof AdminInstancesLobbiesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/admin/'
+    | '/admin/lobbies/$lobbyId'
+    | '/admin/lobbies/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/admin' | '/admin/lobbies/$lobbyId' | '/admin/lobbies'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/admin/'
+    | '/admin/_instances/lobbies/$lobbyId'
+    | '/admin/_instances/lobbies/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +104,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/_instances/lobbies/': {
+      id: '/admin/_instances/lobbies/'
+      path: '/lobbies'
+      fullPath: '/admin/lobbies/'
+      preLoaderRoute: typeof AdminInstancesLobbiesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/_instances/lobbies/$lobbyId': {
+      id: '/admin/_instances/lobbies/$lobbyId'
+      path: '/lobbies/$lobbyId'
+      fullPath: '/admin/lobbies/$lobbyId'
+      preLoaderRoute: typeof AdminInstancesLobbiesLobbyIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminInstancesLobbiesLobbyIdRoute: typeof AdminInstancesLobbiesLobbyIdRoute
+  AdminInstancesLobbiesIndexRoute: typeof AdminInstancesLobbiesIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+  AdminInstancesLobbiesLobbyIdRoute: AdminInstancesLobbiesLobbyIdRoute,
+  AdminInstancesLobbiesIndexRoute: AdminInstancesLobbiesIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -2,10 +2,16 @@ import type { WSMessageReceive } from "hono/ws";
 import { z } from "zod";
 
 const actions = {
+	subscribe: "subscribe",
+	unsubscribe: "unsubscribe",
 	lobby: {
 		create: "lobby:create",
 		delete: "lobby:delete",
 		edit: "lobby:edit",
+		kick: "lobby:kick",
+		move: "lobby:move",
+		get: "lobby:get",
+		all: "lobby:getAll",
 	},
 } as const;
 

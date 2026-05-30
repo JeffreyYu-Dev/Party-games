@@ -1,15 +1,4 @@
-import { z } from "zod";
-
-const createEnv = () => {
-	const envSchema = z.object({});
-
-	const { success, data } = envSchema.safeParse({});
-
-	if (!success) {
-		throw new Error("Invalid env");
-	}
-
-	return data ?? {};
+export const env = {
+	apiUrl: import.meta.env.VITE_API_URL ?? "http://localhost:3000",
+	wsUrl: import.meta.env.VITE_WS_URL ?? "ws://localhost:3000/ws",
 };
-
-export const env = createEnv();
